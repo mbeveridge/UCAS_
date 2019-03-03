@@ -1,0 +1,78 @@
+---
+title: "UCAS - example EXACT output (CompSci)"
+output:
+  github_document: default
+  html_notebook: default
+---
+
+```{r setup}
+library(tidyverse)
+library(ggvis)
+```
+
+# UCAS - example EXACT output (CompSci)
+## Data import
+
+Data downloaded from https://www.ucas.com/data-and-analysis/data-products-and-services/exact
+
+"This covers English, Welsh, and Northern Irish domiciled 18 year old applicants applying to computer science courses, who are recorded as achieving the equivalent of ABB grades or above in their best three A levels, between 2013 and 2017. The dimension variables are A level points. The statistics are applications, offers, and acceptances, reported for five cycles."
+
+
+```{r}
+df <- read_csv("data/exact_000000.csv", skip = 12, col_names = TRUE)   # exclude explanation rows
+df
+```
+
+These are not 'UCAS Tariff Points' by any definition I can find between 2013 and 2018. The current UCAS Tariff Calculator gives 128 points for ABB grades (48+40+40), whereas the dataset has 18 points as maximum!
+
+The "PDF format example" explains that `A*`=6, A=5, B=4 and "These scores are calculated purely for analytical purposes and do not relate to the UCAS tariff". `A*A*A*` would then be 18 points (the max) and ABB would be 13 points, (so how are there applicants with 1-12 points?)
+
+
+## Data cleaning : Headings
+
+```{r}
+# shortening the headers and removing spaces
+
+df <- df %>% dplyr::rename(Entry_Year = `Entry Year`, ALevel_points = `Achieved A level point score`, Applications = `Number of Applications`, Offers = `Number of Offers as-at 30 June`, Acceptances = `Number of Acceptances`)
+
+df
+```
+
+
+## Basic EDA
+
+```{r}
+df %>% count(Entry_Year)                    # 5 rows (19 of each)
+df %>% count(Applications)                  # 89 rows
+df %>% count(Applications) %>% count(n)     # 3 rows (ie. some 'duplications' in 95 rows. Not relevant)
+df %>% filter(is.na(Applications))          # 0 rows
+```
+
+```{r}
+df %>%
+  ggplot(aes(Entry_Year, Offers)) +
+  geom_point()
+
+df %>% filter(Entry_Year == "2017-2018") %>%
+  filter(ALevel_points != "No A levels held") %>% 
+  ggplot(aes(Offers, Acceptances)) +
+  geom_point()
+
+df %>% filter(ALevel_points != "No A levels held") %>% 
+  ggplot(aes(Offers, Acceptances)) +
+  geom_point() +
+  facet_wrap(~ Entry_Year)
+
+df %>% filter(ALevel_points != "No A levels held") %>% 
+  ggplot(aes(ALevel_points, Acceptances)) +
+  geom_point()
+
+df %>% filter(ALevel_points != "No A levels held") %>% 
+  ggplot(aes(ALevel_points, Acceptances)) +
+  geom_point() +
+  facet_wrap(~ Entry_Year)
+```
+
+Interesting/unexpected shape to the charts with 'ALevel_points' on the axis. But that's because the text of (eg.) '1 point, 2 points, etc' gets sorted into the order of 1, 11, 12, etc. Need to convert to numeric (or maybe ordered factors)
+
+
