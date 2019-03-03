@@ -50,8 +50,8 @@ df %>% filter(is.na(Applications))          # 0 rows
 
 ```{r}
 df %>%
-  ggplot(aes(Entry_Year, Offers)) +
-  geom_point()
+  ggplot(aes(Entry_Year, Offers, colour = ALevel_points)) +
+  geom_jitter()
 
 df %>% filter(Entry_Year == "2017-2018") %>%
   filter(ALevel_points != "No A levels held") %>% 
@@ -73,6 +73,6 @@ df %>% filter(ALevel_points != "No A levels held") %>%
   facet_wrap(~ Entry_Year)
 ```
 
-Interesting/unexpected shape to the charts with 'ALevel_points' on the axis. But that's because the text of (eg.) '1 point, 2 points, etc' gets sorted into the order of 1, 11, 12, etc. Need to convert to numeric (or maybe ordered factors)
+Interesting/unexpected shape to the charts with 'ALevel_points' on the axis. But that's because the text of (eg.) '1 point, 2 points, etc' gets sorted into the order of 1, 11, 12, etc. Need to convert to numeric (or maybe ordered factors?). That would give a shape more like a normal distribution
 
 
