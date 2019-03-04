@@ -1,6 +1,8 @@
 ---
 title: "UCAS - example EXACT output (CompSci)"
 output:
+  html_document:
+    df_print: paged
   github_document: default
   html_notebook: default
 ---
@@ -103,5 +105,5 @@ df %>% filter(ALevel_points != 0) %>%
 ```
 
 
-
+NOTE : Unable to knit current version of Rmd file (to share corrected charts, etc in html). Yesterday (3/3/19) it knit a first version ok. Now I get "Error: pandoc version 1.12.3 or higher is required and was not found" ...which is an old issue (so don't understand why it worked yesterday)
 
