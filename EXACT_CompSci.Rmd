@@ -39,40 +39,69 @@ df
 ```
 
 
+## Data cleaning : rows
+
+```{r}
+# Keep only the number from 'ALevel_points'. That field then sorts ok on a chart axis
+# "No A levels held" gets converted to "NA", so change that to "0" instead
+
+df <- df %>% mutate(ALevel_points = parse_number(ALevel_points)) %>% 
+  mutate(ALevel_points = replace(ALevel_points,is.na(ALevel_points),0))
+
+df
+```
+
+Could use `stringr` and a regular expression to extract the number (instead of using `parse_number()`). But would then need to load `stringr`, because it isn't part of the core `tidyverse`
+
+
 ## Basic EDA
 
 ```{r}
 df %>% count(Entry_Year)                    # 5 rows (19 of each)
 df %>% count(Applications)                  # 89 rows
 df %>% count(Applications) %>% count(n)     # 3 rows (ie. some 'duplications' in 95 rows. Not relevant)
-df %>% filter(is.na(Applications))          # 0 rows
+df %>% filter(is.na(ALevel_points))         # 0 rows
 ```
 
 ```{r}
+#1
 df %>%
   ggplot(aes(Entry_Year, Offers, colour = ALevel_points)) +
   geom_jitter()
 
+#2
 df %>% filter(Entry_Year == "2017-2018") %>%
-  filter(ALevel_points != "No A levels held") %>% 
+#  filter(ALevel_points != "No A levels held") %>% 
   ggplot(aes(Offers, Acceptances)) +
   geom_point()
 
-df %>% filter(ALevel_points != "No A levels held") %>% 
+#3
+df %>% filter(ALevel_points != 0) %>% 
   ggplot(aes(Offers, Acceptances)) +
   geom_point() +
+  geom_smooth() +
   facet_wrap(~ Entry_Year)
 
-df %>% filter(ALevel_points != "No A levels held") %>% 
+#4
+df %>%
+#  filter(ALevel_points != "No A levels held") %>% 
   ggplot(aes(ALevel_points, Acceptances)) +
   geom_point()
 
-df %>% filter(ALevel_points != "No A levels held") %>% 
+#5
+df %>% filter(ALevel_points != 0) %>% 
   ggplot(aes(ALevel_points, Acceptances)) +
   geom_point() +
+  geom_smooth() +
   facet_wrap(~ Entry_Year)
+
+#6
+df %>% filter(ALevel_points != 0) %>% 
+  ggplot(aes(ALevel_points, Acceptances, colour = Entry_Year)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
 ```
 
-Interesting/unexpected shape to the charts with 'ALevel_points' on the axis. But that's because the text of (eg.) '1 point, 2 points, etc' gets sorted into the order of 1, 11, 12, etc. Need to convert to numeric (or maybe ordered factors?). That would give a shape more like a normal distribution
+
 
 
